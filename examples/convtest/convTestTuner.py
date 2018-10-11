@@ -17,7 +17,7 @@ from opentuner import Result
 
 argparser = argparse.ArgumentParser(parents=opentuner.argparsers())
 argparser.add_argument(
-  '--num-params', type=int, default=10, help='number of parameters to use')
+  '--num-params', type=int, default=300, help='number of parameters to use')
 
 class ConvTestTuner(opentuner.measurement.MeasurementInterface):
 
@@ -50,8 +50,9 @@ class ConvTestTuner(opentuner.measurement.MeasurementInterface):
       
     self.maxscore = weightTotal + 1
     self.best = self.maxscore
-    print 'goals = ',
-    pprint(self.goals)
+    if False:
+      print 'goals = ',
+      pprint(self.goals)
     
     return m
 
@@ -61,18 +62,22 @@ class ConvTestTuner(opentuner.measurement.MeasurementInterface):
     # self.call_program('true')
     score = self.maxscore
     nonMatches = 0
-    for p in cfg.keys():
+    lastNonMatch = None
+    for p in sorted(cfg.keys()):
       # mark in trace
       self.trace[p][cfg[p]] = 1
       if cfg[p] == self.goals[p]:
         score -= self.weight[p]
       else:
         nonMatches += 1
+        lastNonMatch = p
         
     if score < self.best:
       self.best = score
       self.bestcfg = cfg
-      print 'score=%d, (%d wrong) after %d tests' % (score, nonMatches, self.testnum)
+      print 'score=%d, (%d wrong) after %d tests' % (score, nonMatches, self.testnum),
+      if lastNonMatch is not None:
+        print ', highest=%s, weight %d' % (lastNonMatch, self.weight[lastNonMatch])
     # stop if all match
     if (score == 1):
       # pprint(cfg)
@@ -90,7 +95,7 @@ class ConvTestTuner(opentuner.measurement.MeasurementInterface):
     print 'best score was %d' % self.best
     for p in sorted(cfgDict.keys()):
       if cfgDict[p] != self.goals[p]:
-        print '%s, weight %d' % (p, self.weight[p])
+        print '(%s, weight %d)  ' % (p, self.weight[p]), 
 
   
 if __name__ == '__main__':
