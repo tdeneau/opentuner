@@ -44,12 +44,13 @@ class ConvTestTuner(opentuner.measurement.MeasurementInterface):
       # m.add_parameter(manipulator.EnumParameter(pname, ['on', 'off']))
       self.goals[pname] = random.randint(0,1) == 0 
       self.trace[pname] = {}
-      weight = n*n
+      weight = n*n + 1
       self.weight[pname] = weight
       weightTotal += weight
       
     self.maxscore = weightTotal + 1
     self.best = self.maxscore
+    self.bestcfg = None
     if False:
       print 'goals = ',
       pprint(self.goals)
@@ -74,15 +75,21 @@ class ConvTestTuner(opentuner.measurement.MeasurementInterface):
         
     if score < self.best:
       self.best = score
-      self.bestcfg = cfg
       print 'score=%d, (%d wrong) after %d tests' % (score, nonMatches, self.testnum),
       if lastNonMatch is not None:
-        print ', highest=%s, weight %d' % (lastNonMatch, self.weight[lastNonMatch])
-    # stop if all match
-    if (score == 1):
-      # pprint(cfg)
-      print 'reached perfect score, exiting'
-      sys.exit(0)
+        print ', highest=%s, weight %d' % (lastNonMatch, self.weight[lastNonMatch]),
+      if False and self.bestcfg is not None:
+        print ', changes:',
+        for p in sorted(cfg.keys()):
+          if cfg[p] != self.bestcfg[p]:
+            print '%s,' % p,
+      print
+
+      self.bestcfg = cfg
+      if lastNonMatch is None:
+        print 'reached perfect score, exiting'
+        sys.exit(0)
+        
     return Result(time=score)
 
   
