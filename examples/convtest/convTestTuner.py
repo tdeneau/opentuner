@@ -54,9 +54,6 @@ class ConvTestTuner(opentuner.measurement.MeasurementInterface):
       elif self.args.use_int_param:
         m.add_parameter(manipulator.IntegerParameter(pname, 256, 257))
         self.goals[pname] = 256 if randbool else 257
-      elif self.args.use_logint_param:
-        m.add_parameter(manipulator.LogIntegerParameter(pname, 256, 257))
-        self.goals[pname] = 256 if randbool else 257
       else:
         m.add_parameter(manipulator.BooleanParameter(pname))
         self.goals[pname] = randbool 
